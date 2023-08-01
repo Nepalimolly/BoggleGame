@@ -1,8 +1,5 @@
 from unittest import TestCase
-from app import app
-from flask import session
-from boggle import Boggle
-
+from app import app 
 
 class FlaskTests(TestCase):
 
@@ -15,37 +12,20 @@ class FlaskTests(TestCase):
 
         with self.client:
             response = self.client.get('/')
-            self.assertIn('board', session)
-            self.assertIsNone(session.get('highscore'))
-            self.assertIsNone(session.get('nplays'))
-            self.assertIn(b'<p>High Score:', response.data)
-            self.assertIn(b'Score:', response.data)
-            self.assertIn(b'Seconds Left:', response.data)
+            self.assertIn(b'<h1>Forex Currency', response.data)
+            self.assertIn(b'<label>Converting from:', response.data)
+            self.assertIn(b'<label>Converting to:', response.data)
+            self.assertIn(b'<label>Amount:', response.data)
 
-    def test_valid_word(self):
-
-        with self.client as client:
-            with client.session_transaction() as sess:
-                sess['board'] = [["C", "A", "T", "T", "T"], 
-                                 ["C", "A", "T", "T", "T"], 
-                                 ["C", "A", "T", "T", "T"], 
-                                 ["C", "A", "T", "T", "T"], 
-                                 ["C", "A", "T", "T", "T"]]
-        response = self.client.get('/check-word?word=cat')
-        self.assertEqual(response.json['result'], 'ok')
-
-    def test_invalid_word(self):
-
-        self.client.get('/')
-        response = self.client.get('/check-word?word=impossible')
-        self.assertEqual(response.json['result'], 'not-on-board')
-
-    def non_english_word(self):
-
-        self.client.get('/')
-        response = self.client.get('/check-word?word=hoobbababahdhshhdhfhdhsfhhsfh')
-        self.assertEqual(response.json['result'], 'not-word')
-
+    def test_currency(self):
+        
+        with self.client:
+            response1 = self.client.post('/', data={"converting-from": "USD", "converting-to": "USD", "amount": "1"})
+            self.assertIn(b'<p>The Result Is $ 1.0</p>', response1.data)
+            response2 = self.client.post('/', data={"converting-from": "USD", "converting-to": "EUR", "amount": "100"})
+            self.assertIn(b'90.91</p>', response2.data)
+            response3 = self.client.post('/', data={"converting-from": "USD", "converting-to": "INR", "amount": "6000"})
+            self.assertIn(b'493200.0</p>', response3.data)
+ 
             
-
-
+        
